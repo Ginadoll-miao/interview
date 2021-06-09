@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta http-equiv="Access-Control-Allow-Origin" content="*">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>题目二-调查问卷</title>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+	<div class="question-box">
+		<div class="question-head">
+			<h3>请将您的答案排序后提交</h3>
+			<p>拖动右边把手排序</p>
+		</div>
+		<ul id="sortBox" class="question-list">
+			<li class="sortele" draggable="true">
+				<div class="sortnumb">1</div>
+				<div class="sortext">选项A</div>
+				<div class="sorticon">
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+				</div>
+			</li>
+			<li class="sortele" draggable="true">
+				<div class="sortnumb">2</div>
+				<div class="sortext">选项B</div>
+				<div class="sorticon">
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+				</div>
+			</li>
+			<li class="sortele" draggable="true">
+				<div class="sortnumb">3</div>
+				<div class="sortext">选项C</div>
+				<div class="sorticon">
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+				</div>
+			</li>
+			<li class="sortele" draggable="true">
+				<div class="sortnumb">4</div>
+				<div class="sortext">选项D</div>
+				<div class="sorticon">
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+					<i class="sorticon-line"></i>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+<script>
+	var node = document.querySelector("#sortBox");
+	var eles = document.createElement("li");
+	var draging = null;
+
+	node.ondragstart = function(event) {
+		draging = event.target;
+		draging.classList.add("active");
+	}
+
+	// 离开恢复样式
+    node.ondragleave = function (){
+		eles.classList.add("on");
+		draging.classList.remove("active");
+    }
+
+	node.ondragover = function(event) {
+		event.preventDefault();
+		var target = event.target;
+		var numwz = event.target.firstElementChild;
+		var num = numwz.innerText;
+		
+		if (target.nodeName === "LI" && target !== draging) {
+			// 获取初始位置
+			var targetRect = target.getBoundingClientRect()
+			var dragingRect = draging.getBoundingClientRect()
+			if (target) {
+				// 判断是否动画元素
+				if (target.animated) {
+					return;
+				}
+			}
+			if (_index(draging) < _index(target)) {
+				// 目标比元素大，插到其后面
+				target.parentNode.insertBefore(draging, target.nextSibling)
+				draging.firstElementChild.innerText=num;
+				target.firstElementChild.innerText=num-1;
+			} else {
+				// 目标比元素小，插到其前面
+				target.parentNode.insertBefore(draging, target)
+				draging.firstElementChild.innerText=num;
+				target.firstElementChild.innerText=parseInt(num)+1;
+			}
+			_animate(dragingRect, draging);
+			_animate(targetRect, target);
+			// console.log(event.target.firstElementChild.innerText);   
+		}
+	}
+
+	// 获取元素在父元素中的index
+	function _index(el) {
+		var index = 0
+		if (!el || !el.parentNode) {
+			return -1
+		}
+		// previousElementSibling：上一个兄弟元素
+		while (el && (el = el.previousElementSibling)) {
+			index++
+		}
+		return index
+	}
+	// 触发动画
+	function _animate(prevRect, target) {
+		var ms = 300
+		if (ms) {
+			var currentRect = target.getBoundingClientRect()
+			if (prevRect.nodeType === 1) {
+				prevRect = prevRect.getBoundingClientRect()
+			}
+			_css(target, 'transition', 'none')
+			_css(target, 'transform', 'translate3d(' +
+				(prevRect.left - currentRect.left) + 'px,' +
+				(prevRect.top - currentRect.top) + 'px,0)'
+			);
+
+			target.offsetWidth; // 触发重绘
+
+			_css(target, 'transition', 'all ' + ms + 'ms');
+			_css(target, 'transform', 'translate3d(0,0,0)');
+			// 事件到了之后把transition和transform清空
+			clearTimeout(target.animated);
+			target.animated = setTimeout(function() {
+				_css(target, 'transition', '');
+				_css(target, 'transform', '');
+				target.animated = false;
+			}, ms);
+		}
+	}
+	// 给元素添加style
+	function _css(el, prop, val) {
+		var style = el && el.style
+		if (style) {
+			if (val === void 0) {
+				if (document.defaultView && document.defaultView.getComputedStyle) {
+					val = document.defaultView.getComputedStyle(el, '')
+				} else if (el.currentStyle) {
+					val = el.currentStyle
+				}
+				return prop === void 0 ? val : val[prop]
+			} else {
+				if (!(prop in style)) {
+					prop = '-webkit-' + prop;
+				}
+				style[prop] = val + (typeof val === 'string' ? '' : 'px')
+			}
+		}
+	}
+</script>
+</body>
+</html>
